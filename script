@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Detener contenedor anterior si existe
+docker stop flask_app || true
+docker rm flask_app || true
+
+# Borrar Dockerfile existente
+rm -f Dockerfile
+
+# Crear nuevo Dockerfile
+cat <<EOF > Dockerfile
+FROM python:3.10-slim
+
+WORKDIR /app
+COPY . .
+
+RUN pip install --no-cache-dir flask
+
+EXPOSE 5000
+CMD ["python3", "server.py"]
+EOF
+
+# Construir nueva imagen Docker
+docker build -t flask_image .
+
+# Ejecutar contenedor
+docker run -d -p 5000:5000 --name flask_app flask_image
